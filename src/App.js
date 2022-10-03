@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import { GET_ORGANIZATION } from './graphql/GetOrganization';
 import { Organization } from './Components/Organization';
+import {
+  getIssuesOfRepositoryQuery,
+  GET_ISSUES_OF_REPOSITORY,
+} from './graphql/GetIssuesOfRepository';
 
 const axiosGitHubGraphQL = axios.create({
   baseURL: 'https://api.github.com/graphql',
@@ -20,7 +23,7 @@ class App extends Component {
   };
 
   componentDidMount() {
-    this.onFetchFromGitHub();
+    this.onFetchFromGitHub(this.state.path);
   }
 
   onChange = (event) => {
@@ -28,16 +31,25 @@ class App extends Component {
   };
 
   onSubmit = (event) => {
+    this.onFetchFromGitHub(this.state.path);
+
     event.preventDefault();
   };
 
-  onFetchFromGitHub = () => {
-    axiosGitHubGraphQL.post('', { query: GET_ORGANIZATION }).then((result) => {
-      this.setState({
-        organization: result.data.data.organization,
-        errors: result.data.errors,
+  onFetchFromGitHub = (path) => {
+    const [organization, repository] = path.split('/');
+
+    axiosGitHubGraphQL
+      .post('', {
+        query: GET_ISSUES_OF_REPOSITORY,
+        variables: { organization, repository },
+      })
+      .then((result) => {
+        this.setState({
+          organization: result.data.data.organization,
+          errors: result.data.errors,
+        });
       });
-    });
   };
 
   render() {

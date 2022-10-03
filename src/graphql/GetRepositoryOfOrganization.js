@@ -9,4 +9,4 @@ export const GET_REPOSITORY_OF_ORGANIZATION = `
 			}
 		}
 	}
-`
+`;
