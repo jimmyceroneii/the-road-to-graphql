@@ -10,7 +10,9 @@ export const Repository = ({ repository }) => (
     <ul>
       {repository.issues.edges.map((issue) => (
         <li key={issue.node.id}>
-          <a href={issue.node.url}>{issue.node.title}</a>
+          <a href={issue.node.url}>
+            {issue.node.title} - {issue.node.state}
+          </a>
         </li>
       ))}
     </ul>
