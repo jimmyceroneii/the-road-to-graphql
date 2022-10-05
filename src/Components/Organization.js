@@ -11,6 +11,8 @@ export const Organization = ({ organization, errors }) => {
     );
   }
 
+  console.log('organization: ', organization);
+
   return (
     <div>
       <p>

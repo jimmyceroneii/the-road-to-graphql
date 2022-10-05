@@ -1,4 +1,5 @@
 import React from 'react';
+import { Issue } from './Issue';
 
 export const Repository = ({ repository }) => (
   <div>
@@ -9,11 +10,7 @@ export const Repository = ({ repository }) => (
 
     <ul>
       {repository.issues.edges.map((issue) => (
-        <li key={issue.node.id}>
-          <a href={issue.node.url}>
-            {issue.node.title} - {issue.node.state}
-          </a>
-        </li>
+        <Issue key={issue.node.id} issue={issue} />
       ))}
     </ul>
   </div>
