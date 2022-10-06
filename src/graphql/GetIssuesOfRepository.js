@@ -4,8 +4,10 @@ export const GET_ISSUES_OF_REPOSITORY = `
 			name
 			url
 			repository(name: $repository) {
+				id
 				name
 				url
+				viewerHasStarred
 				issues(first: 5, after: $cursor, states: [OPEN]) {
 					totalCount
 					pageInfo {

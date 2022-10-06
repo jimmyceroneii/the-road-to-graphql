@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import { Organization } from './Components/Organization';
 import { GET_ISSUES_OF_REPOSITORY } from './graphql/GetIssuesOfRepository';
+import { ADD_STAR_TO_REPOSITORY } from './graphql/AddStarToRepository';
 
 const axiosGitHubGraphQL = axios.create({
   baseURL: 'https://api.github.com/graphql',
@@ -11,6 +12,30 @@ const axiosGitHubGraphQL = axios.create({
 });
 
 const TITLE = 'React GraphQL GitHub Client';
+
+const addStarToRepository = (repositoryId) => {
+  return axiosGitHubGraphQL.post('', {
+    query: ADD_STAR_TO_REPOSITORY,
+    variables: {
+      repositoryId,
+    },
+  });
+};
+
+const resolveAddStarMutation = (mutationResult) => (state) => {
+  const { viewerHasStarred } = mutationResult.data.data.addStar.starrable;
+
+  return {
+    ...state,
+    organization: {
+      ...state.organization,
+      repository: {
+        ...state.organization.repository,
+        viewerHasStarred,
+      },
+    },
+  };
+};
 
 const getIssuesOfRepository = (path, cursor) => {
   const [organization, repository] = path.split('/');
@@ -32,7 +57,6 @@ const resolveIssuesQuery = (queryResult, cursor) => (state) => {
   }
 
   const { edges: oldIssues } = state.organization.repository.issues;
-  console.log('old issues: ', oldIssues);
   const { edges: newIssues } = data.organization.repository.issues;
 
   const updatedIssues = [...oldIssues, ...newIssues];
@@ -85,6 +109,16 @@ class App extends Component {
     this.onFetchFromGitHub(this.state.path, endCursor);
   };
 
+  /**
+   * @param {string} repositoryId
+   * @param {boolean} viewerHasStarred
+   */
+  onStarRepository = (repositoryId, viewerHasStarred) => {
+    addStarToRepository(repositoryId).then((result) =>
+      this.setState(resolveAddStarMutation(result))
+    );
+  };
+
   render() {
     const { path, organization } = this.state;
 
@@ -110,6 +144,7 @@ class App extends Component {
           <Organization
             organization={organization}
             onFetchMoreIssues={this.onFetchMoreIssues}
+            onStarRepository={this.onStarRepository}
           />
         ) : (
           <p>No information yet...</p>
