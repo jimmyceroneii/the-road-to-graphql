@@ -5,6 +5,7 @@ export const Repository = ({
   repository,
   onFetchMoreIssues,
   onStarRepository,
+  onRemoveStarFromRepository,
 }) => (
   <div>
     <p>
@@ -14,10 +15,15 @@ export const Repository = ({
 
     <button
       type='button'
-      onClick={() =>
-        onStarRepository(repository.id, repository.viewerHasStarred)
-      }
+      onClick={() => {
+        if (repository.viewerHasStarred) {
+          onRemoveStarFromRepository(repository.id);
+        } else {
+          onStarRepository(repository.id);
+        }
+      }}
     >
+      {repository.stargazers.totalCount}{' '}
       {repository.viewerHasStarred ? 'Unstar' : 'Star'}
     </button>
 

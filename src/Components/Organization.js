@@ -6,6 +6,7 @@ export const Organization = ({
   errors,
   onFetchMoreIssues,
   onStarRepository,
+  onRemoveStarFromRepository,
 }) => {
   if (errors) {
     return (
@@ -26,6 +27,7 @@ export const Organization = ({
         repository={organization.repository}
         onFetchMoreIssues={onFetchMoreIssues}
         onStarRepository={onStarRepository}
+        onRemoveStarFromRepository={onRemoveStarFromRepository}
       />
     </div>
   );

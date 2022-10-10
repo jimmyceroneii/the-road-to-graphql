@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Organization } from './Components/Organization';
 import { GET_ISSUES_OF_REPOSITORY } from './graphql/GetIssuesOfRepository';
 import { ADD_STAR_TO_REPOSITORY } from './graphql/AddStarToRepository';
+import { REMOVE_STAR_FROM_REPOSITORY } from './graphql/RemoveStarFromRepository';
 
 const axiosGitHubGraphQL = axios.create({
   baseURL: 'https://api.github.com/graphql',
@@ -25,6 +26,8 @@ const addStarToRepository = (repositoryId) => {
 const resolveAddStarMutation = (mutationResult) => (state) => {
   const { viewerHasStarred } = mutationResult.data.data.addStar.starrable;
 
+  const { totalCount } = state.organization.repository.stargazers;
+
   return {
     ...state,
     organization: {
@@ -32,6 +35,38 @@ const resolveAddStarMutation = (mutationResult) => (state) => {
       repository: {
         ...state.organization.repository,
         viewerHasStarred,
+        stargazers: {
+          totalCount: totalCount + 1,
+        },
+      },
+    },
+  };
+};
+
+const removeStarFromRepository = (repositoryId) => {
+  return axiosGitHubGraphQL.post('', {
+    query: REMOVE_STAR_FROM_REPOSITORY,
+    variables: {
+      repositoryId,
+    },
+  });
+};
+
+const resolveRemoveStarMutation = (mutationResult) => (state) => {
+  const { viewerHasStarred } = mutationResult.data.data.removeStar.starrable;
+
+  const { totalCount } = state.organization.repository.stargazers;
+
+  return {
+    ...state,
+    organization: {
+      ...state.organization,
+      repository: {
+        ...state.organization.repository,
+        viewerHasStarred,
+        stargazers: {
+          totalCount: totalCount - 1,
+        },
       },
     },
   };
@@ -111,11 +146,16 @@ class App extends Component {
 
   /**
    * @param {string} repositoryId
-   * @param {boolean} viewerHasStarred
    */
-  onStarRepository = (repositoryId, viewerHasStarred) => {
+  onStarRepository = (repositoryId) => {
     addStarToRepository(repositoryId).then((result) =>
       this.setState(resolveAddStarMutation(result))
+    );
+  };
+
+  onRemoveStarFromRepository = (repositoryId) => {
+    removeStarFromRepository(repositoryId).then((result) =>
+      this.setState(resolveRemoveStarMutation(result))
     );
   };
 
@@ -145,6 +185,7 @@ class App extends Component {
             organization={organization}
             onFetchMoreIssues={this.onFetchMoreIssues}
             onStarRepository={this.onStarRepository}
+            onRemoveStarFromRepository={this.onRemoveStarFromRepository}
           />
         ) : (
           <p>No information yet...</p>
